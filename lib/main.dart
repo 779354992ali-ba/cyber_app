@@ -458,7 +458,7 @@ class HomeTabContent extends StatelessWidget {
               children: [
                 Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2),
-                Text(time, style: const TextStyle(color: Colors.white56, fontSize: 12)),
+                Text(time, style: TextStyle(color: Colors.white.withOpacity(0.56), fontSize: 12)),
               ],
             ),
           ),
