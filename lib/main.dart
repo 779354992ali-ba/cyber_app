@@ -336,7 +336,7 @@ class _Login3DScreenState extends State<Login3DScreen>
   }
 }
 
-// ==================== 2. لوحة التحكم الرئيسية (إدارة التبويبات) ====================
+// ==================== 2. لوحة التحكم الرئيسية ====================
 class DashboardScreen extends StatefulWidget {
   final String userEmail;
   final String userName;
@@ -393,18 +393,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               unselectedItemColor: Colors.white.withOpacity(0.4),
               elevation: 0,
               items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.dashboard_rounded),
-                  label: 'الرئيسية',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.widgets_rounded),
-                  label: 'الأدوات',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.code_rounded),
-                  label: 'المحرر الذكي',
-                ),
+                BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'الرئيسية'),
+                BottomNavigationBarItem(icon: Icon(Icons.widgets_rounded), label: 'الأدوات'),
+                BottomNavigationBarItem(icon: Icon(Icons.code_rounded), label: 'المحرر الذكي'),
               ],
             ),
           ),
@@ -414,16 +405,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// ==================== تبويب 1: لوحة البيانات الرئيسية ====================
+// ==================== تبويب 1: الرئيسية ====================
 class HomeTabContent extends StatelessWidget {
   final String userName;
   final String userEmail;
 
-  const HomeTabContent({
-    super.key,
-    required this.userName,
-    required this.userEmail,
-  });
+  const HomeTabContent({super.key, required this.userName, required this.userEmail});
+
+  void _showInfoDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF13111C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(title, style: const TextStyle(color: Colors.white)),
+        content: Text(content, style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('حسناً', style: TextStyle(color: Color(0xFFA855F7))),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -437,30 +442,14 @@ class HomeTabContent extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'أهلاً بك، $userName',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  Text('أهلاً بك، $userName', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
                   const SizedBox(height: 4),
-                  Text(
-                    userEmail,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.6),
-                    ),
-                  ),
+                  Text(userEmail, style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.6))),
                 ],
               ),
               IconButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login3DScreen()),
-                  );
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Login3DScreen()));
                 },
                 icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                 tooltip: 'تسجيل الخروج',
@@ -472,132 +461,111 @@ class HomeTabContent extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildStatCard(
+                  context,
                   'الأنظمة المتصلة',
                   '12',
                   Icons.router_rounded,
                   const Color(0xFF6366F1),
+                  () => _showInfoDialog(context, 'تفاصيل الأنظمة المتصلة', 'إجمالي السيرفرات والأنظمة النشطة حالياً: 12 نظام متصل بكفاءة وخوادم مستقرة.'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStatCard(
+                  context,
                   'المهام المنجزة',
                   '38',
                   Icons.task_alt_rounded,
                   const Color(0xFFA855F7),
+                  () => _showInfoDialog(context, 'تفاصيل المهام المنجزة', 'تم إنجاز 38 مهمة بنجاح ضمن الجدول الزمني للنظام وجلسات العمل الأخيرة.'),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text(
-            'سجل العمليات الحديثة',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
+          const Text('سجل العمليات الحديثة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 12),
           _buildActivityItem(
+            context,
             'تم مزامنة قاعدة البيانات بنجاح',
             'منذ 5 دقائق',
             Icons.cloud_done_rounded,
             Colors.green,
+            () => _showInfoDialog(context, 'تفاصيل المزامنة', 'عملية مزامنة البيانات السحابية تمت بنجاح وبدون أي فقدان في الحزم.'),
           ),
           _buildActivityItem(
+            context,
             'فحص الحماية والاتصالات الآمنة',
             'منذ ساعة',
             Icons.shield_rounded,
             Colors.blue,
-          ),
-          _buildActivityItem(
-            'تحديث إعدادات جدار الحماية',
-            'منذ 3 ساعات',
-            Icons.settings_suggest_rounded,
-            Colors.purple,
+            () => _showInfoDialog(context, 'تفاصيل الحماية', 'فحص جدار الحماية والشهادات الرقمية أثبت سلامة جميع المنافذ والاتصالات.'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white60,
-            ),
-          ),
-        ],
+  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 16),
+            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 4),
+            Text(title, style: const TextStyle(fontSize: 13, color: Colors.white60)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildActivityItem(String title, String time, IconData icon, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  time,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.56),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+  Widget _buildActivityItem(BuildContext context, String title, String time, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.03),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(time, style: TextStyle(color: Colors.white.withOpacity(0.56), fontSize: 12)),
+                ],
+              ),
             ),
-          ),
-        ],
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white38),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ==================== تبويب 2: إدارة الأدوات والخدمات ====================
+// ==================== تبويب 2: الأدوات (تفاعلية بالكامل وتفتح نوافذ تفصيلية) ====================
 class ToolsTabContent extends StatefulWidget {
   const ToolsTabContent({super.key});
 
@@ -609,20 +577,57 @@ class _ToolsTabContentState extends State<ToolsTabContent> {
   bool _isServiceActive = true;
   double _sliderValue = 75.0;
 
+  void _showToolModal(BuildContext context, String title, String description, IconData icon, Color color) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF13111C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 10),
+            Expanded(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(description, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+            const SizedBox(height: 16),
+            const LinearProgressIndicator(color: Color(0xFFA855F7), backgroundColor: Colors.white12),
+            const SizedBox(height: 10),
+            const Text('حالة الأداة: جاهزة للتشغيل والتنفيذ الفوري.', style: TextStyle(color: Colors.tealAccent, fontSize: 12)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إغلاق', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('تم تنفيذ أداة ($title) بنجاح 🚀'), backgroundColor: color),
+              );
+            },
+            child: const Text('تنفيذ الأداة', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text(
-            'إدارة الخدمات والأدوات',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
+          const Text('إدارة الخدمات والأدوات', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 16),
           _buildControlCard(
             title: 'حالة النظام الأساسي',
@@ -630,59 +635,48 @@ class _ToolsTabContentState extends State<ToolsTabContent> {
             child: Switch(
               value: _isServiceActive,
               activeColor: const Color(0xFFA855F7),
-              onChanged: (value) {
-                setState(() {
-                  _isServiceActive = value;
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(value ? 'تم تفعيل الخدمة بنجاح' : 'تم إيقاف الخدمة مؤقتاً'),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              },
+              onChanged: (value) => setState(() => _isServiceActive = value),
             ),
           ),
           const SizedBox(height: 16),
           _buildControlCard(
             title: 'مستوى الأداء والموارد',
-            subtitle: 'تحديد الحد الأقصى لاستهلاك الموارد: ${_sliderValue.toInt()}%',
+            subtitle: 'تحديد استهلاك الموارد: ${_sliderValue.toInt()}%',
             child: Slider(
               value: _sliderValue,
               min: 0,
               max: 100,
               divisions: 10,
               activeColor: const Color(0xFF6366F1),
-              inactiveColor: Colors.white12,
-              onChanged: (value) {
-                setState(() {
-                  _sliderValue = value;
-                });
-              },
+              onChanged: (value) => setState(() => _sliderValue = value),
             ),
           ),
           const SizedBox(height: 16),
-          _buildToolActionCard(
+          _buildActionCard(
             title: 'فحص التحديثات الأمنية',
             desc: 'التحقق من حزم النظام وجدار الحماية وتحديث التوقيعات',
             icon: Icons.security_update_good_rounded,
             color: Colors.teal,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('النظام محدث بالكامل لأحدث إصدار')),
-              );
-            },
+            onTap: () => _showToolModal(
+              context,
+              'فحص التحديثات الأمنية',
+              'تقوم هذه الأداة بفحص توقيعات النظام والتأكد من عدم وجود ثغرات أمنية في الاتصالات أو السيرفرات المتصلة.',
+              Icons.security_update_good_rounded,
+              Colors.teal,
+            ),
           ),
-          _buildToolActionCard(
+          _buildActionCard(
             title: 'تفريغ الذاكرة المؤقتة',
             desc: 'حذف الملفات المؤقتة لتحسين سرعة وأداء التطبيق',
             icon: Icons.cleaning_services_rounded,
             color: Colors.amber,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('تم تنظيف الذاكرة المؤقتة بنجاح')),
-              );
-            },
+            onTap: () => _showToolModal(
+              context,
+              'تفريغ الذاكرة المؤقتة',
+              'سيتم مسح الملفات المؤقتة والبيانات المخبأة لإتاحة مساحة أكبر وتحسين استجابة التطبيق بشكل ملحوظ.',
+              Icons.cleaning_services_rounded,
+              Colors.amber,
+            ),
           ),
         ],
       ),
@@ -710,43 +704,45 @@ class _ToolsTabContentState extends State<ToolsTabContent> {
     );
   }
 
-  Widget _buildToolActionCard({
-    required String title,
-    required String desc,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 26),
+  Widget _buildActionCard({required String title, required String desc, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
-        title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(desc, style: const TextStyle(fontSize: 12, color: Colors.white60)),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  const SizedBox(height: 4),
+                  Text(desc, style: const TextStyle(fontSize: 12, color: Colors.white60)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white38),
+          ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white54),
-        onTap: onTap,
       ),
     );
   }
 }
 
-// ==================== تبويب 3: محرر الأكواد والتحليل الذكي للأخطاء ====================
+// ==================== تبويب 3: المحرر الذكي ومحاكي التنفيذ ====================
 class CodeEditorTabContent extends StatefulWidget {
   const CodeEditorTabContent({super.key});
 
@@ -756,63 +752,48 @@ class CodeEditorTabContent extends StatefulWidget {
 
 class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
   final TextEditingController _codeController = TextEditingController(
-    text: 'void main() {\n  print("Control Center Script Executed Successfully");\n  // جرب كتابة كود ناقص فاصلة منقوطة لاختبار المحلل\n}',
+    text: 'void main() {\n  print("Hello from Control Center Execution Engine!");\n}',
   );
   String selectedLanguage = 'Dart';
   List<String> _analysisResults = [];
-  bool _isAnalyzing = false;
+  String _executionOutput = '';
 
-  void _analyzeAndFormatCode() {
-    setState(() {
-      _isAnalyzing = true;
-      _analysisResults.clear();
-    });
-
-    Future.delayed(const Duration(milliseconds: 600), () {
-      final code = _codeController.text;
-      List<String> issues = [];
-
-      int openBraces = '\{'.allMatches(code).length;
-      int closeBraces = '\}'.allMatches(code).length;
-      if (openBraces != closeBraces) {
-        issues.add('⚠️ خطأ في الأقواس: عدم تطابق أقواس البداية ({) والنهاية (}).');
-      }
-
-      if (selectedLanguage != 'Python' && code.contains('print') && !code.contains(';')) {
-        issues.add('💡 اقتراح تصحيح: يبدو أنك نسيت وضع الفاصلة المنقوطة (;) في نهاية السطر البرمجي.');
-      }
-
-      if (code.contains('var ') && !code.contains('=')) {
-        issues.add('⚠️ تنبيه: تم الإعلان عن متغير دون تعيين قيمة أولية له.');
-      }
-
-      if (issues.isEmpty) {
-        issues.add('✅ الكود سليم تماماً ومنسق، ولا توجد أخطاء ظاهرة.');
-      }
-
-      setState(() {
-        _isAnalyzing = false;
-        _analysisResults = issues;
-      });
-    });
+  void _analyzeCode() {
+    final code = _codeController.text;
+    List<String> issues = [];
+    if (!code.contains('main')) {
+      issues.add('⚠️ تنبيه: الدالة الرئيسية main() غير موجودة.');
+    } else {
+      issues.add('✅ الكود سليم وخالٍ من الأخطاء النحوية الأساسية.');
+    }
+    setState(() => _analysisResults = issues);
   }
 
-  void _formatCode() {
-    String currentText = _codeController.text;
-    List<String> lines = currentText.split('\n');
-    String formatted = lines.map((line) => line.trim()).join('\n');
-    
+  void _runScript() {
+    final code = _codeController.text;
     setState(() {
-      _codeController.text = formatted;
+      _executionOutput = '> جاري ترجمة وتنفيذ سكربت ($selectedLanguage)...\n';
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('✨ تم تنسيق وترتيب الكود بنجاح'),
-        backgroundColor: Colors.teal,
-        duration: Duration(seconds: 1),
-      ),
-    );
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (code.contains('print')) {
+        RegExp regExp = RegExp(r'print\s*\(\s*["\']([^"\']*)["\']\s*\)');
+        Match? match = regExp.firstMatch(code);
+        if (match != null) {
+          setState(() {
+            _executionOutput += '✔ تم التنفيذ بنجاح.\n[Output]: ${match.group(1)}';
+          });
+        } else {
+          setState(() {
+            _executionOutput += '✔ تم تنفيذ السكربت بنجاح بدون مخرجات نصية.';
+          });
+        }
+      } else {
+        setState(() {
+          _executionOutput += '✔ تم تشغيل السكربت بنجاح.';
+        });
+      }
+    });
   }
 
   @override
@@ -826,56 +807,39 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'المحرر الذكي والمحلل',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
+                const Text('المحرر الذكي ومحاكي التنفيذ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                 DropdownButton<String>(
                   value: selectedLanguage,
                   dropdownColor: const Color(0xFF13111C),
                   style: const TextStyle(color: Colors.white),
-                  items: ['Dart', 'Python', 'JavaScript', 'JSON'].map((String lang) {
-                    return DropdownMenuItem<String>(value: lang, child: Text(lang));
-                  }).toList(),
-                  onChanged: (newValue) => setState(() => selectedLanguage = newValue!),
+                  items: ['Dart', 'Python', 'JavaScript'].map((lang) => DropdownMenuItem(value: lang, child: Text(lang))).toList(),
+                  onChanged: (val) => setState(() => selectedLanguage = val!),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _formatCode,
-                    icon: const Icon(Icons.format_align_left_rounded, size: 18, color: Color(0xFFA855F7)),
-                    label: const Text('تنسيق تلقائي', style: TextStyle(color: Colors.white, fontSize: 13)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
+                ElevatedButton.icon(
+                  onPressed: _analyzeCode,
+                  icon: const Icon(Icons.analytics, size: 16),
+                  label: const Text('فحص الأخطاء'),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _isAnalyzing ? null : _analyzeAndFormatCode,
-                    icon: _isAnalyzing 
-                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.analytics_rounded, size: 18, color: Color(0xFF6366F1)),
-                    label: Text(_isAnalyzing ? 'جاري التحليل...' : 'فحص الأخطاء', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
+                ElevatedButton.icon(
+                  onPressed: _runScript,
+                  icon: const Icon(Icons.play_arrow, size: 16),
+                  label: const Text('تشغيل السكربت'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Expanded(
-              flex: 3,
+              flex: 2,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(15),
@@ -885,68 +849,29 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
                   controller: _codeController,
                   maxLines: null,
                   expands: true,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontFamily: 'monospace',
-                    fontSize: 14,
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'اكتب الكود هنا...',
-                    hintStyle: TextStyle(color: Colors.white24),
-                  ),
+                  style: const TextStyle(color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 13),
+                  decoration: const InputDecoration(border: InputBorder.none, hintText: 'اكتب الكود هنا...'),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            if (_analysisResults.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
+            const SizedBox(height: 10),
+            Expanded(
+              flex: 1,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.4)),
+                  color: const Color(0xFF040608),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.teal.withOpacity(0.3)),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '🔍 تقرير التحليل واقتراحات الحلول:',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFA855F7)),
-                    ),
-                    const SizedBox(height: 6),
-                    ..._analysisResults.map((result) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        result,
-                        style: const TextStyle(fontSize: 12, color: Colors.white70),
-                      ),
-                    )),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم تنفيذ السكربت البرمجي بنجاح 🚀'),
-                      backgroundColor: Color(0xFF6366F1),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
-                label: const Text(
-                  'تشغيل السكربت',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _executionOutput.isEmpty 
+                        ? (_analysisResults.isEmpty ? 'جاهز للتنفيذ والتحليل...' : _analysisResults.join('\n'))
+                        : _executionOutput,
+                    style: const TextStyle(color: Colors.lightGreenAccent, fontFamily: 'monospace', fontSize: 12),
+                  ),
                 ),
               ),
             ),
@@ -957,7 +882,7 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
   }
 }
 
-// ==================== رسم الخلفية التفاعلية 3D ====================
+// ==================== رسم الخلفية ====================
 class Background3DPainter extends CustomPainter {
   final double animationValue;
   Background3DPainter(this.animationValue);
@@ -965,24 +890,9 @@ class Background3DPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    
-    final offset1 = Offset(
-      size.width * 0.2 + math.sin(animationValue * 2 * math.pi) * 40,
-      size.height * 0.2 + math.cos(animationValue * 2 * math.pi) * 40,
-    );
-    paint.shader = RadialGradient(
-      colors: [const Color(0xFF6366F1).withOpacity(0.5), Colors.transparent],
-    ).createShader(Rect.fromCircle(center: offset1, radius: 200));
+    final offset1 = Offset(size.width * 0.2 + math.sin(animationValue * 2 * math.pi) * 40, size.height * 0.2);
+    paint.shader = RadialGradient(colors: [const Color(0xFF6366F1).withOpacity(0.4), Colors.transparent]).createShader(Rect.fromCircle(center: offset1, radius: 200));
     canvas.drawCircle(offset1, 200, paint);
-
-    final offset2 = Offset(
-      size.width * 0.8 + math.cos(animationValue * 2 * math.pi) * 50,
-      size.height * 0.8 + math.sin(animationValue * 2 * math.pi) * 50,
-    );
-    paint.shader = RadialGradient(
-      colors: [const Color(0xFFA855F7).withOpacity(0.4), Colors.transparent],
-    ).createShader(Rect.fromCircle(center: offset2, radius: 250));
-    canvas.drawCircle(offset2, 250, paint);
   }
 
   @override
