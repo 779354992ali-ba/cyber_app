@@ -565,7 +565,7 @@ class HomeTabContent extends StatelessWidget {
   }
 }
 
-// ==================== تبويب 2: الأدوات (تفاعلية بالكامل وتفتح نوافذ تفصيلية) ====================
+// ==================== تبويب 2: الأدوات ====================
 class ToolsTabContent extends StatefulWidget {
   const ToolsTabContent({super.key});
 
@@ -777,7 +777,8 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
 
     Future.delayed(const Duration(milliseconds: 400), () {
       if (code.contains('print')) {
-        RegExp regExp = RegExp(r'print\s*\(\s*["\']([^"\']*)["\']\s*\)');
+        // تم تصحيح الـ RegExp لتجنب أي أخطاء ترجمة في سحب الـ APK
+        RegExp regExp = RegExp(r'print\s*\(([^)]+)\)');
         Match? match = regExp.firstMatch(code);
         if (match != null) {
           setState(() {
