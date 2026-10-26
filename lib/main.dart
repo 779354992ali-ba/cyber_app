@@ -13,16 +13,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Cyber Dashboard App',
+      title: 'Control Center App',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF090B10),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6366F1),
+          brightness: Brightness.dark,
+        ),
       ),
       home: const Login3DScreen(),
     );
   }
 }
 
-// ==================== 1. شاشة تسجيل الدخول ====================
+// ==================== 1. شاشة تسجيل الدخول التفاعلية ====================
 class Login3DScreen extends StatefulWidget {
   const Login3DScreen({super.key});
 
@@ -38,6 +42,7 @@ class _Login3DScreenState extends State<Login3DScreen>
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   double _tiltX = 0;
   double _tiltY = 0;
@@ -62,6 +67,7 @@ class _Login3DScreenState extends State<Login3DScreen>
     _pulseController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -72,17 +78,24 @@ class _Login3DScreenState extends State<Login3DScreen>
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('الرجاء إدخال البريد الإلكتروني وكلمة المرور'),
+          content: Text('الرجاء إدخال البريد الإلكتروني وكلمة المرور بدقة'),
           backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
 
-    // الانتقال مباشرة إلى لوحة التحكم الرئيسية المتكاملة
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      MaterialPageRoute(
+        builder: (context) => DashboardScreen(
+          userEmail: email,
+          userName: _nameController.text.trim().isNotEmpty 
+              ? _nameController.text.trim() 
+              : email.split('@')[0],
+        ),
+      ),
     );
   }
 
@@ -119,7 +132,7 @@ class _Login3DScreenState extends State<Login3DScreen>
             ),
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                 child: Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
@@ -175,7 +188,7 @@ class _Login3DScreenState extends State<Login3DScreen>
                                   ],
                                 ),
                                 child: const Icon(
-                                  Icons.lock_outline_rounded,
+                                  Icons.security_rounded,
                                   size: 36,
                                   color: Colors.white,
                                 ),
@@ -183,7 +196,7 @@ class _Login3DScreenState extends State<Login3DScreen>
                             ),
                             const SizedBox(height: 24),
                             Text(
-                              isLogin ? 'مرحباً بك مجدداً' : 'حساب جديد',
+                              isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد',
                               style: const TextStyle(
                                 fontSize: 26,
                                 fontWeight: FontWeight.bold,
@@ -192,13 +205,22 @@ class _Login3DScreenState extends State<Login3DScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              isLogin ? 'قم بتسجيل الدخول للمتابعة' : 'أنشئ حسابك للبدء معنا',
+                              isLogin ? 'أدخل بياناتك للمتابعة إلى النظام' : 'املأ الحقول التالية للتسجيل',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.white.withOpacity(0.7),
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 26),
+                            if (!isLogin) ...[
+                              _buildTextField(
+                                controller: _nameController,
+                                hint: 'الاسم الكامل',
+                                icon: Icons.person_outline,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
                             _buildTextField(
                               controller: _emailController,
                               hint: 'البريد الإلكتروني',
@@ -235,7 +257,7 @@ class _Login3DScreenState extends State<Login3DScreen>
                                   child: Container(
                                     alignment: Alignment.center,
                                     child: Text(
-                                      isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب',
+                                      isLogin ? 'دخول للنظام' : 'إتمام التسجيل',
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -259,7 +281,7 @@ class _Login3DScreenState extends State<Login3DScreen>
                                   style: TextStyle(color: Colors.white.withOpacity(0.7)),
                                   children: [
                                     TextSpan(
-                                      text: isLogin ? 'إنشاء حساب' : 'تسجيل الدخول',
+                                      text: isLogin ? 'سجل الان' : 'تسجيل الدخول',
                                       style: const TextStyle(
                                         color: Color(0xFFA855F7),
                                         fontWeight: FontWeight.bold,
@@ -314,9 +336,16 @@ class _Login3DScreenState extends State<Login3DScreen>
   }
 }
 
-// ==================== 2. الشاشة الرئيسية والتبويبات ====================
+// ==================== 2. لوحة التحكم الرئيسية (إدارة التبويبات) ====================
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final String userEmail;
+  final String userName;
+
+  const DashboardScreen({
+    super.key,
+    required this.userEmail,
+    required this.userName,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -328,8 +357,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      const HomeTabContent(),
-      const ProjectsTabContent(),
+      HomeTabContent(userName: widget.userName, userEmail: widget.userEmail),
+      const ToolsTabContent(),
       const CodeEditorTabContent(),
     ];
 
@@ -364,9 +393,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               unselectedItemColor: Colors.white.withOpacity(0.4),
               elevation: 0,
               items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'لوحة التحكم'),
-                BottomNavigationBarItem(icon: Icon(Icons.apps_rounded), label: 'الأدوات'),
-                BottomNavigationBarItem(icon: Icon(Icons.code_rounded), label: 'محرر الأكواد'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.dashboard_rounded),
+                  label: 'الرئيسية',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.widgets_rounded),
+                  label: 'الأدوات',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.code_rounded),
+                  label: 'المحرر الذكي',
+                ),
               ],
             ),
           ),
@@ -376,9 +414,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// تبويب 1: لوحة التحكم
+// ==================== تبويب 1: لوحة البيانات الرئيسية ====================
 class HomeTabContent extends StatelessWidget {
-  const HomeTabContent({super.key});
+  final String userName;
+  final String userEmail;
+
+  const HomeTabContent({
+    super.key,
+    required this.userName,
+    required this.userEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -386,33 +431,92 @@ class HomeTabContent extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('مرحباً بك، المبرمج', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                  SizedBox(height: 4),
-                  Text('إليك نظرة عامة على نشاطك اليوم', style: TextStyle(fontSize: 14, color: Colors.white60)),
+                  Text(
+                    'أهلاً بك، $userName',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    userEmail,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.6),
+                    ),
+                  ),
                 ],
               ),
-              CircleAvatar(backgroundColor: Color(0xFF6366F1), child: Icon(Icons.person, color: Colors.white)),
+              IconButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login3DScreen()),
+                  );
+                },
+                icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                tooltip: 'تسجيل الخروج',
+              ),
             ],
           ),
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: _buildStatCard('المشاريع النشطة', '4', Icons.folder_special, const Color(0xFF6366F1))),
+              Expanded(
+                child: _buildStatCard(
+                  'الأنظمة المتصلة',
+                  '12',
+                  Icons.router_rounded,
+                  const Color(0xFF6366F1),
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard('المهام المكتملة', '18', Icons.task_alt, const Color(0xFFA855F7))),
+              Expanded(
+                child: _buildStatCard(
+                  'المهام المنجزة',
+                  '38',
+                  Icons.task_alt_rounded,
+                  const Color(0xFFA855F7),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text('آخر النشاطات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Text(
+            'سجل العمليات الحديثة',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
           const SizedBox(height: 12),
-          _buildActivityItem('تم إطلاق واجهة الـ 3D بنجاح', 'منذ ساعة', Icons.check_circle, Colors.green),
-          _buildActivityItem('تحديث محرر الأكواد الشامل', 'منذ 3 ساعات', Icons.update, Colors.blue),
+          _buildActivityItem(
+            'تم مزامنة قاعدة البيانات بنجاح',
+            'منذ 5 دقائق',
+            Icons.cloud_done_rounded,
+            Colors.green,
+          ),
+          _buildActivityItem(
+            'فحص الحماية والاتصالات الآمنة',
+            'منذ ساعة',
+            Icons.shield_rounded,
+            Colors.blue,
+          ),
+          _buildActivityItem(
+            'تحديث إعدادات جدار الحماية',
+            'منذ 3 ساعات',
+            Icons.settings_suggest_rounded,
+            Colors.purple,
+          ),
         ],
       ),
     );
@@ -431,9 +535,22 @@ class HomeTabContent extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 16),
-          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(title, style: const TextStyle(fontSize: 13, color: Colors.white60)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.white60,
+            ),
+          ),
         ],
       ),
     );
@@ -456,9 +573,21 @@ class HomeTabContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(time, style: TextStyle(color: Colors.white.withOpacity(0.56), fontSize: 12)),
+                Text(
+                  time,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.56),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -468,9 +597,17 @@ class HomeTabContent extends StatelessWidget {
   }
 }
 
-// تبويب 2: الأدوات والمشاريع
-class ProjectsTabContent extends StatelessWidget {
-  const ProjectsTabContent({super.key});
+// ==================== تبويب 2: إدارة الأدوات والخدمات ====================
+class ToolsTabContent extends StatefulWidget {
+  const ToolsTabContent({super.key});
+
+  @override
+  State<ToolsTabContent> createState() => _ToolsTabContentState();
+}
+
+class _ToolsTabContentState extends State<ToolsTabContent> {
+  bool _isServiceActive = true;
+  double _sliderValue = 75.0;
 
   @override
   Widget build(BuildContext context) {
@@ -478,50 +615,138 @@ class ProjectsTabContent extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text('مشاريعي وأدواتي', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Text(
+            'إدارة الخدمات والأدوات',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
           const SizedBox(height: 16),
-          _buildProjectCard('Bisho Top Platform', 'تطبيق ترفيهي اجتماعي متكامل', Icons.phone_android, const Color(0xFF6366F1)),
-          _buildProjectCard('Cyber 3D Login', 'واجهة دخول زجاجية مستقبلية', Icons.lock, const Color(0xFFA855F7)),
-          _buildProjectCard('Universal Code Editor', 'محرر أكواد يدعم لغات متعددة', Icons.code, Colors.teal),
+          _buildControlCard(
+            title: 'حالة النظام الأساسي',
+            subtitle: _isServiceActive ? 'النظام يعمل بكفاءة عالية' : 'النظام متوقف مؤقتاً',
+            child: Switch(
+              value: _isServiceActive,
+              activeColor: const Color(0xFFA855F7),
+              onChanged: (value) {
+                setState(() {
+                  _isServiceActive = value;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(value ? 'تم تفعيل الخدمة بنجاح' : 'تم إيقاف الخدمة مؤقتاً'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildControlCard(
+            title: 'مستوى الأداء والموارد',
+            subtitle: 'تحديد الحد الأقصى لاستهلاك الموارد: ${_sliderValue.toInt()}%',
+            child: Slider(
+              value: _sliderValue,
+              min: 0,
+              max: 100,
+              divisions: 10,
+              activeColor: const Color(0xFF6366F1),
+              inactiveColor: Colors.white12,
+              onChanged: (value) {
+                setState(() {
+                  _sliderValue = value;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildToolActionCard(
+            title: 'فحص التحديثات الأمنية',
+            desc: 'التحقق من حزم النظام وجدار الحماية وتحديث التوقيعات',
+            icon: Icons.security_update_good_rounded,
+            color: Colors.teal,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('النظام محدث بالكامل لأحدث إصدار')),
+              );
+            },
+          ),
+          _buildToolActionCard(
+            title: 'تفريغ الذاكرة المؤقتة',
+            desc: 'حذف الملفات المؤقتة لتحسين سرعة وأداء التطبيق',
+            icon: Icons.cleaning_services_rounded,
+            color: Colors.amber,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('تم تنظيف الذاكرة المؤقتة بنجاح')),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildProjectCard(String title, String desc, IconData icon, Color color) {
+  Widget _buildControlCard({required String title, required String subtitle, required Widget child}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
-            child: Icon(icon, color: color, size: 30),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                const SizedBox(height: 6),
-                Text(desc, style: const TextStyle(fontSize: 13, color: Colors.white60)),
-              ],
-            ),
-          ),
+          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 4),
+          Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.white60)),
+          const SizedBox(height: 12),
+          child,
         ],
+      ),
+    );
+  }
+
+  Widget _buildToolActionCard({
+    required String title,
+    required String desc,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 26),
+        ),
+        title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(desc, style: const TextStyle(fontSize: 12, color: Colors.white60)),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white54),
+        onTap: onTap,
       ),
     );
   }
 }
 
-// تبويب 3: محرر الأكواد
+// ==================== تبويب 3: محرر الأكواد والتحليل الذكي للأخطاء ====================
 class CodeEditorTabContent extends StatefulWidget {
   const CodeEditorTabContent({super.key});
 
@@ -531,9 +756,64 @@ class CodeEditorTabContent extends StatefulWidget {
 
 class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
   final TextEditingController _codeController = TextEditingController(
-    text: 'void main() {\n  print("Hello from Universal Code Editor!");\n}',
+    text: 'void main() {\n  print("Control Center Script Executed Successfully");\n  // جرب كتابة كود ناقص فاصلة منقوطة لاختبار المحلل\n}',
   );
   String selectedLanguage = 'Dart';
+  List<String> _analysisResults = [];
+  bool _isAnalyzing = false;
+
+  void _analyzeAndFormatCode() {
+    setState(() {
+      _isAnalyzing = true;
+      _analysisResults.clear();
+    });
+
+    Future.delayed(const Duration(milliseconds: 600), () {
+      final code = _codeController.text;
+      List<String> issues = [];
+
+      int openBraces = '\{'.allMatches(code).length;
+      int closeBraces = '\}'.allMatches(code).length;
+      if (openBraces != closeBraces) {
+        issues.add('⚠️ خطأ في الأقواس: عدم تطابق أقواس البداية ({) والنهاية (}).');
+      }
+
+      if (selectedLanguage != 'Python' && code.contains('print') && !code.contains(';')) {
+        issues.add('💡 اقتراح تصحيح: يبدو أنك نسيت وضع الفاصلة المنقوطة (;) في نهاية السطر البرمجي.');
+      }
+
+      if (code.contains('var ') && !code.contains('=')) {
+        issues.add('⚠️ تنبيه: تم الإعلان عن متغير دون تعيين قيمة أولية له.');
+      }
+
+      if (issues.isEmpty) {
+        issues.add('✅ الكود سليم تماماً ومنسق، ولا توجد أخطاء ظاهرة.');
+      }
+
+      setState(() {
+        _isAnalyzing = false;
+        _analysisResults = issues;
+      });
+    });
+  }
+
+  void _formatCode() {
+    String currentText = _codeController.text;
+    List<String> lines = currentText.split('\n');
+    String formatted = lines.map((line) => line.trim()).join('\n');
+    
+    setState(() {
+      _codeController.text = formatted;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✨ تم تنسيق وترتيب الكود بنجاح'),
+        backgroundColor: Colors.teal,
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -546,48 +826,124 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('محرر الأكواد الذكي', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                const Text(
+                  'المحرر الذكي والمحلل',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
                 DropdownButton<String>(
                   value: selectedLanguage,
                   dropdownColor: const Color(0xFF13111C),
                   style: const TextStyle(color: Colors.white),
-                  items: ['Dart', 'Python', 'JavaScript', 'C++'].map((String lang) {
+                  items: ['Dart', 'Python', 'JavaScript', 'JSON'].map((String lang) {
                     return DropdownMenuItem<String>(value: lang, child: Text(lang));
                   }).toList(),
                   onChanged: (newValue) => setState(() => selectedLanguage = newValue!),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _formatCode,
+                    icon: const Icon(Icons.format_align_left_rounded, size: 18, color: Color(0xFFA855F7)),
+                    label: const Text('تنسيق تلقائي', style: TextStyle(color: Colors.white, fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isAnalyzing ? null : _analyzeAndFormatCode,
+                    icon: _isAnalyzing 
+                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.analytics_rounded, size: 18, color: Color(0xFF6366F1)),
+                    label: Text(_isAnalyzing ? 'جاري التحليل...' : 'فحص الأخطاء', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Expanded(
+              flex: 3,
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(color: Colors.white.withOpacity(0.1)),
                 ),
                 child: TextField(
                   controller: _codeController,
                   maxLines: null,
                   expands: true,
-                  style: const TextStyle(color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 14),
-                  decoration: const InputDecoration(border: InputBorder.none, hintText: 'اكتب الكود هنا...'),
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'اكتب الكود هنا...',
+                    hintStyle: TextStyle(color: Colors.white24),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            if (_analysisResults.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '🔍 تقرير التحليل واقتراحات الحلول:',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFA855F7)),
+                    ),
+                    const SizedBox(height: 6),
+                    ..._analysisResults.map((result) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        result,
+                        style: const TextStyle(fontSize: 12, color: Colors.white70),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 46,
               child: ElevatedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم تنفيذ الكود بنجاح 🚀'), backgroundColor: Color(0xFF6366F1)),
+                    const SnackBar(
+                      content: Text('تم تنفيذ السكربت البرمجي بنجاح 🚀'),
+                      backgroundColor: Color(0xFF6366F1),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
-                label: const Text('تشغيل الكود', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                label: const Text(
+                  'تشغيل السكربت',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6366F1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -601,7 +957,7 @@ class _CodeEditorTabContentState extends State<CodeEditorTabContent> {
   }
 }
 
-// خلفية 3D
+// ==================== رسم الخلفية التفاعلية 3D ====================
 class Background3DPainter extends CustomPainter {
   final double animationValue;
   Background3DPainter(this.animationValue);
@@ -609,6 +965,7 @@ class Background3DPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
+    
     final offset1 = Offset(
       size.width * 0.2 + math.sin(animationValue * 2 * math.pi) * 40,
       size.height * 0.2 + math.cos(animationValue * 2 * math.pi) * 40,
